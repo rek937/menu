@@ -1,0 +1,241 @@
+
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--font-sans); background: var(--color-background-tertiary); }
+
+.hero { background: var(--color-background-primary); border-bottom: 0.5px solid var(--color-border-tertiary); padding: 2rem 1.5rem 1.5rem; text-align: center; }
+.hero h1 { font-size: 22px; font-weight: 500; color: var(--color-text-primary); margin-bottom: 6px; }
+.hero p { font-size: 14px; color: var(--color-text-secondary); }
+
+.section-title { font-size: 13px; font-weight: 500; color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: 0.06em; padding: 1.5rem 1.5rem 0.75rem; }
+
+.menu-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; padding: 0 1.5rem 1rem; }
+
+.dish-card { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 1rem; cursor: pointer; transition: border-color 0.15s; position: relative; }
+.dish-card:hover { border-color: var(--color-border-secondary); }
+.dish-card.selected { border: 1.5px solid #1D9E75; }
+
+.dish-emoji { font-size: 28px; margin-bottom: 8px; display: block; }
+.dish-name { font-size: 14px; font-weight: 500; color: var(--color-text-primary); margin-bottom: 4px; }
+.dish-desc { font-size: 12px; color: var(--color-text-secondary); line-height: 1.4; margin-bottom: 8px; }
+.dish-price { font-size: 13px; color: #1D9E75; font-weight: 500; }
+
+.qty-control { display: flex; align-items: center; gap: 8px; margin-top: 10px; }
+.qty-btn { width: 26px; height: 26px; border-radius: 50%; border: 0.5px solid var(--color-border-secondary); background: var(--color-background-secondary); font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--color-text-primary); line-height: 1; }
+.qty-btn:hover { background: var(--color-background-tertiary); }
+.qty-num { font-size: 14px; font-weight: 500; min-width: 16px; text-align: center; color: var(--color-text-primary); }
+
+.cart-bar { background: var(--color-background-primary); border-top: 0.5px solid var(--color-border-tertiary); padding: 1rem 1.5rem; position: sticky; bottom: 0; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.cart-summary { font-size: 13px; color: var(--color-text-secondary); }
+.cart-count { font-weight: 500; color: var(--color-text-primary); font-size: 15px; }
+.order-btn { background: #1D9E75; color: #fff; border: none; border-radius: var(--border-radius-md); padding: 10px 20px; font-size: 14px; font-weight: 500; cursor: pointer; }
+.order-btn:disabled { background: var(--color-background-tertiary); color: var(--color-text-secondary); cursor: not-allowed; }
+.order-btn:not(:disabled):hover { background: #0F6E56; }
+
+.modal-bg { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.35); z-index: 100; align-items: center; justify-content: center; padding: 1.5rem; }
+.modal-bg.open { display: flex; }
+.modal { background: var(--color-background-primary); border-radius: var(--border-radius-lg); padding: 1.5rem; width: 100%; max-width: 400px; border: 0.5px solid var(--color-border-tertiary); }
+.modal h2 { font-size: 18px; font-weight: 500; margin-bottom: 4px; }
+.modal-sub { font-size: 13px; color: var(--color-text-secondary); margin-bottom: 1.25rem; }
+.order-items { border-top: 0.5px solid var(--color-border-tertiary); border-bottom: 0.5px solid var(--color-border-tertiary); padding: 0.75rem 0; margin-bottom: 1rem; }
+.order-item-row { display: flex; justify-content: space-between; font-size: 13px; padding: 3px 0; color: var(--color-text-primary); }
+.field-label { font-size: 13px; color: var(--color-text-secondary); margin-bottom: 4px; }
+input[type=text], input[type=email], textarea { width: 100%; margin-bottom: 12px; font-family: var(--font-sans); }
+textarea { height: 64px; resize: none; }
+.modal-actions { display: flex; gap: 8px; margin-top: 4px; }
+.cancel-btn { flex: 1; background: var(--color-background-secondary); border: 0.5px solid var(--color-border-secondary); border-radius: var(--border-radius-md); padding: 10px; font-size: 14px; cursor: pointer; color: var(--color-text-primary); }
+.submit-btn { flex: 2; background: #1D9E75; border: none; border-radius: var(--border-radius-md); padding: 10px; font-size: 14px; font-weight: 500; color: #fff; cursor: pointer; }
+.submit-btn:hover { background: #0F6E56; }
+.submit-btn:disabled { background: var(--color-background-tertiary); color: var(--color-text-secondary); cursor: not-allowed; }
+
+.toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); background: #1D9E75; color: #fff; padding: 10px 20px; border-radius: var(--border-radius-md); font-size: 14px; display: none; z-index: 200; white-space: nowrap; }
+.toast.show { display: block; }
+.status-msg { font-size: 13px; margin-top: 8px; min-height: 18px; color: var(--color-text-secondary); text-align: center; }
+</style>
+
+<h2 class="sr-only">点餐页面，选择菜品并提交订单</h2>
+
+<div class="hero">
+  <span style="font-size:32px">🍽️</span>
+  <h1>今日菜单</h1>
+  <p>选好菜品，填写姓名，订单直接送达厨房</p>
+</div>
+
+<div class="section-title">主食 &amp; 主菜</div>
+<div class="menu-grid" id="menuGrid"></div>
+
+<div class="section-title">特饮</div>
+<div class="menu-grid" id="drinkGrid"></div>
+
+<div class="cart-bar">
+  <div>
+    <div class="cart-count" id="cartCount">0 件菜品</div>
+    <div class="cart-summary" id="cartTotal">尚未选择</div>
+  </div>
+  <button class="order-btn" id="checkoutBtn" disabled onclick="openModal()">提交订单</button>
+</div>
+
+<div class="modal-bg" id="modalBg">
+  <div class="modal">
+    <h2>确认订单</h2>
+    <p class="modal-sub">请核对菜品并填写你的信息</p>
+    <div class="order-items" id="orderItems"></div>
+    <div class="field-label">你的名字</div>
+    <input type="text" id="nameInput" placeholder="例如：小明" />
+    <div class="field-label">你的邮件（接收确认）</div>
+    <input type="email" id="emailInput" placeholder="your@email.com" />
+    <div class="field-label">备注（可选）</div>
+    <textarea id="noteInput" placeholder="少辣、不加葱..."></textarea>
+    <div class="status-msg" id="statusMsg"></div>
+    <div class="modal-actions">
+      <button class="cancel-btn" onclick="closeModal()">返回</button>
+      <button class="submit-btn" id="submitBtn" onclick="submitOrder()">确认下单</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast">✓ 订单已发送！厨师正在备餐</div>
+
+<script>
+const dishes = [
+  { id: 1, name: "蛋炒饭", emoji: "🍳", desc: "经典锅气蛋炒饭", price: 15, cat: "food" },
+  { id: 2, name: "糖醋排骨", emoji: "🍖", desc: "酸甜酥嫩，下饭神器", price: 38, cat: "food" },
+  { id: 3, name: "话梅排骨", emoji: "🍗", desc: "话梅入味，微酸鲜香", price: 38, cat: "food" },
+  { id: 4, name: "红烧肉", emoji: "🥩", desc: "肥而不腻，入口即化", price: 42, cat: "food" },
+  { id: 5, name: "干锅花菜", emoji: "🥦", desc: "香辣爽脆，素食首选", price: 22, cat: "food" },
+  { id: 6, name: "清炖牛肋条", emoji: "🍲", desc: "慢炖三小时，汤清味醇", price: 58, cat: "food" },
+  { id: 7, name: "菠萝冰", emoji: "🧊", desc: "清凉解暑，台式特调", price: 18, cat: "drink" },
+];
+
+const cart = {};
+
+function renderMenu() {
+  const food = dishes.filter(d => d.cat === "food");
+  const drink = dishes.filter(d => d.cat === "drink");
+  document.getElementById("menuGrid").innerHTML = food.map(cardHTML).join("");
+  document.getElementById("drinkGrid").innerHTML = drink.map(cardHTML).join("");
+}
+
+function cardHTML(d) {
+  const qty = cart[d.id] || 0;
+  return `<div class="dish-card ${qty > 0 ? 'selected' : ''}" id="card-${d.id}">
+    <span class="dish-emoji">${d.emoji}</span>
+    <div class="dish-name">${d.name}</div>
+    <div class="dish-desc">${d.desc}</div>
+    <div class="dish-price">¥${d.price}</div>
+    <div class="qty-control">
+      <button class="qty-btn" onclick="changeQty(${d.id}, -1)" aria-label="减少">−</button>
+      <span class="qty-num">${qty}</span>
+      <button class="qty-btn" onclick="changeQty(${d.id}, 1)" aria-label="增加">+</button>
+    </div>
+  </div>`;
+}
+
+function changeQty(id, delta) {
+  cart[id] = Math.max(0, (cart[id] || 0) + delta);
+  if (cart[id] === 0) delete cart[id];
+  updateCard(id);
+  updateCartBar();
+}
+
+function updateCard(id) {
+  const d = dishes.find(x => x.id === id);
+  const el = document.getElementById("card-" + id);
+  if (!el) return;
+  const qty = cart[id] || 0;
+  el.className = "dish-card" + (qty > 0 ? " selected" : "");
+  el.querySelector(".qty-num").textContent = qty;
+}
+
+function updateCartBar() {
+  const ids = Object.keys(cart);
+  const total = ids.reduce((s, id) => s + cart[id] * dishes.find(d => d.id == id).price, 0);
+  const count = ids.reduce((s, id) => s + cart[id], 0);
+  const btn = document.getElementById("checkoutBtn");
+  document.getElementById("cartCount").textContent = count > 0 ? count + " 件菜品" : "0 件菜品";
+  document.getElementById("cartTotal").textContent = count > 0 ? "合计 ¥" + total : "尚未选择";
+  btn.disabled = count === 0;
+}
+
+function openModal() {
+  const ids = Object.keys(cart);
+  let html = "";
+  ids.forEach(id => {
+    const d = dishes.find(x => x.id == id);
+    html += `<div class="order-item-row"><span>${d.emoji} ${d.name} × ${cart[id]}</span><span>¥${d.price * cart[id]}</span></div>`;
+  });
+  const total = ids.reduce((s, id) => s + cart[id] * dishes.find(d => d.id == id).price, 0);
+  html += `<div class="order-item-row" style="font-weight:500; margin-top:6px;"><span>合计</span><span>¥${total}</span></div>`;
+  document.getElementById("orderItems").innerHTML = html;
+  document.getElementById("statusMsg").textContent = "";
+  document.getElementById("modalBg").classList.add("open");
+}
+
+function closeModal() {
+  document.getElementById("modalBg").classList.remove("open");
+}
+
+async function submitOrder() {
+  const name = document.getElementById("nameInput").value.trim();
+  const email = document.getElementById("emailInput").value.trim();
+  const note = document.getElementById("noteInput").value.trim();
+  const statusEl = document.getElementById("statusMsg");
+  const btn = document.getElementById("submitBtn");
+
+  if (!name) { statusEl.textContent = "请填写你的名字"; return; }
+  if (!email || !email.includes("@")) { statusEl.textContent = "请填写有效的邮箱"; return; }
+
+  const ids = Object.keys(cart);
+  const items = ids.map(id => {
+    const d = dishes.find(x => x.id == id);
+    return `${d.name} × ${cart[id]}（¥${d.price * cart[id]}）`;
+  }).join("\n");
+  const total = ids.reduce((s, id) => s + cart[id] * dishes.find(d => d.id == id).price, 0);
+
+  btn.disabled = true;
+  statusEl.textContent = "正在发送…";
+
+  const OWNER_EMAIL = "YOUR_EMAIL@example.com";
+
+  try {
+    const res = await fetch("https://api.emailjs.com/api/v1.0/email/send", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        service_id: "YOUR_SERVICE_ID",
+        template_id: "YOUR_TEMPLATE_ID",
+        user_id: "YOUR_PUBLIC_KEY",
+        template_params: {
+          to_email: OWNER_EMAIL,
+          customer_name: name,
+          customer_email: email,
+          order_items: items,
+          order_total: "¥" + total,
+          note: note || "无",
+          order_time: new Date().toLocaleString("zh-CN")
+        }
+      })
+    });
+
+    if (res.ok || res.status === 200) {
+      closeModal();
+      const toast = document.getElementById("toast");
+      toast.classList.add("show");
+      setTimeout(() => toast.classList.remove("show"), 3500);
+      Object.keys(cart).forEach(id => { delete cart[id]; updateCard(id); });
+      updateCartBar();
+      document.getElementById("nameInput").value = "";
+      document.getElementById("emailInput").value = "";
+      document.getElementById("noteInput").value = "";
+    } else {
+      statusEl.textContent = "发送失败，请重试";
+    }
+  } catch(e) {
+    statusEl.textContent = "网络错误，请检查配置";
+  }
+  btn.disabled = false;
+}
+
+renderMenu();
+updateCartBar();
+</script>
