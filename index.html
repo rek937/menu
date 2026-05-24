@@ -195,16 +195,16 @@ async function submitOrder() {
   btn.disabled = true;
   statusEl.textContent = "正在发送…";
 
-  const OWNER_EMAIL = "YOUR_EMAIL@example.com";
+  const OWNER_EMAIL = "bcw2479745065@gmail.com";
 
   try {
     const res = await fetch("https://api.emailjs.com/api/v1.0/email/send", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        service_id: "YOUR_SERVICE_ID",
-        template_id: "YOUR_TEMPLATE_ID",
-        user_id: "YOUR_PUBLIC_KEY",
+        service_id: "service_rek",
+        template_id: "template_regadbo",
+        user_id: "8_MeFi0MbbPv_M92_",
         template_params: {
           to_email: OWNER_EMAIL,
           customer_name: name,
