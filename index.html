@@ -142,29 +142,29 @@ html,body{font-family:'Noto Sans SC',sans-serif;background:var(--bg);color:var(-
 <script>
 const dishes = [
   // 主食
-  { id:1,  name:"牛腩饭",       emoji:"🍛", desc:"软烂牛腩配白米饭",       price:28, cat:"rice" },
-  { id:2,  name:"卤肉饭",       emoji:"🍚", desc:"台式卤肉，香润下饭",     price:22, cat:"rice" },
-  { id:3,  name:"大米饭",       emoji:"🍚", desc:"白米饭，清香爽口",       price:8, cat:"rice" },
+  { id:1,  name:"牛腩饭",       emoji:"🍛", desc:"软烂牛腩配白米饭",       price:18, cat:"rice" },
+  { id:2,  name:"卤肉饭",       emoji:"🍚", desc:"台式卤肉，香润下饭",     price:12, cat:"rice" },
+  { id:3,  name:"大米饭",       emoji:"🍚", desc:"白米饭，清香爽口",       price:0, cat:"rice" },
   
   // 荤菜 - 热菜
-  { id:4,  name:"虫草花蒸鸡翅", emoji:"🍗", desc:"虫草花提鲜，蒸制嫩滑",   price:38, cat:"meat-hot" },
-  { id:5,  name:"百香果酸辣柠檬虾", emoji:"🦐", desc:"酸辣清爽，开胃解馋",  price:48, cat:"meat-hot" },
-  { id:6,  name:"清炖牛肋条",   emoji:"🍲", desc:"慢炖三小时，汤清味醇",   price:58, cat:"meat-hot" },
-  { id:7,  name:"话梅排骨",     emoji:"🍖", desc:"话梅入味，微酸鲜香",     price:38, cat:"meat-hot" },
-  { id:8,  name:"红烧肉",       emoji:"🥩", desc:"肥而不腻，入口即化",     price:42, cat:"meat-hot" },
-  { id:9,  name:"糖醋排骨",     emoji:"🍖", desc:"酸甜酥嫩，下饭神器",     price:38, cat:"meat-hot" },
-  { id:10, name:"蒜蓉虾滑粉丝煲", emoji:"🥘", desc:"虾滑鲜弹，粉丝吸汁",   price:45, cat:"meat-hot" },
-  { id:11, name:"鸡翅鸡爪煲",   emoji:"🍗", desc:"香卤入味，啃起来过瘾",   price:42, cat:"meat-hot" },
-  { id:12, name:"西红柿炒鸡蛋", emoji:"🍅", desc:"经典家常，酸甜爽口",     price:22, cat:"meat-hot" },
-  { id:13, name:"青椒肉丝",     emoji:"🌶️", desc:"清脆青椒配嫩肉丝",       price:25, cat:"meat-hot" },
+  { id:4,  name:"虫草花蒸鸡翅", emoji:"🍗", desc:"虫草花提鲜，蒸制嫩滑",   price:18, cat:"meat-hot" },
+  { id:5,  name:"百香果酸辣柠檬虾", emoji:"🦐", desc:"酸辣清爽，开胃解馋",  price:28, cat:"meat-hot" },
+  { id:6,  name:"清炖牛肋条",   emoji:"🍲", desc:"慢炖三小时，汤清味醇",   price:38, cat:"meat-hot" },
+  { id:7,  name:"话梅排骨",     emoji:"🍖", desc:"话梅入味，微酸鲜香",     price:28, cat:"meat-hot" },
+  { id:8,  name:"红烧肉",       emoji:"🥩", desc:"肥而不腻，入口即化",     price:22, cat:"meat-hot" },
+  { id:9,  name:"糖醋排骨",     emoji:"🍖", desc:"酸甜酥嫩，下饭神器",     price:28, cat:"meat-hot" },
+  { id:10, name:"蒜蓉虾滑粉丝煲", emoji:"🥘", desc:"虾滑鲜弹，粉丝吸汁",   price:25, cat:"meat-hot" },
+  { id:11, name:"鸡翅鸡爪煲",   emoji:"🍗", desc:"香卤入味，啃起来过瘾",   price:22, cat:"meat-hot" },
+  { id:12, name:"西红柿炒鸡蛋", emoji:"🍅", desc:"经典家常，酸甜爽口",     price:12, cat:"meat-hot" },
+  { id:13, name:"青椒肉丝",     emoji:"🌶️", desc:"清脆青椒配嫩肉丝",       price:15, cat:"meat-hot" },
   
   // 荤菜 - 凉菜
-  { id:14, name:"捞汁小海鲜",   emoji:"🦑", desc:"冰镇捞汁，鲜甜爽口",     price:48, cat:"meat-cold" },
-  { id:15, name:"无骨鸡爪",     emoji:"🍗", desc:"软烂入味，冰爽开胃",     price:28, cat:"meat-cold" },
+  { id:14, name:"捞汁小海鲜",   emoji:"🦑", desc:"冰镇捞汁，鲜甜爽口",     price:28, cat:"meat-cold" },
+  { id:15, name:"无骨鸡爪",     emoji:"🍗", desc:"软烂入味，冰爽开胃",     price:18, cat:"meat-cold" },
   
   // 素菜 & 小食
-  { id:16, name:"干锅花菜",     emoji:"🥦", desc:"香辣爽脆，素食首选",     price:22, cat:"veg" },
-  { id:17, name:"炝拌土豆丝",   emoji:"🥔", desc:"酸辣爽口，开胃小菜",     price:16, cat:"veg" },
+  { id:16, name:"干锅花菜",     emoji:"🥦", desc:"香辣爽脆，素食首选",     price:12, cat:"veg" },
+  { id:17, name:"炝拌土豆丝",   emoji:"🥔", desc:"酸辣爽口，开胃小菜",     price:6, cat:"veg" },
   { id:18, name:"蒸蛋羹",       emoji:"🥚", desc:"嫩滑如豆腐，鲜香清淡",   price:12, cat:"veg" },
   { id:19, name:"老醋花生",     emoji:"🥜", desc:"酥脆花生，酸香下酒",     price:14, cat:"veg" },
   
