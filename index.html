@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>今日菜单</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600&family=Noto+Sans+SC:wght@400;500&display=swap');
+
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --green:#1a7a55;--green-light:#e8f5f0;--green-mid:#2d9e70;
+  --text:#1a1a1a;--muted:#888;--border:#e8e8e8;--bg:#faf9f7;
+  --card:#fff;--radius:16px;--radius-sm:10px;
+}
+html,body{font-family:'Noto Sans SC',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+
+.hero{background:var(--green);padding:2rem 1.25rem 1.5rem;text-align:center;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")}
+.hero-icon{font-size:40px;display:block;margin-bottom:10px;position:relative}
+.hero h1{font-family:'Noto Serif SC',serif;font-size:24px;font-weight:600;color:#fff;margin-bottom:6px;position:relative}
+.hero p{font-size:13px;color:rgba(255,255,255,0.75);line-height:1.5;position:relative}
+
+.section-label{font-size:11px;font-weight:500;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;padding:1.25rem 1.25rem 0.6rem}
+
+.menu-list{display:flex;flex-direction:column;gap:10px;padding:0 1.25rem 0.5rem}
+
+.dish-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:14px;display:flex;align-items:center;gap:14px;transition:border-color .15s,box-shadow .15s}
+.dish-card.selected{border-color:var(--green);box-shadow:0 0 0 1px var(--green)}
+.dish-emoji{font-size:30px;flex-shrink:0;width:52px;height:52px;display:flex;align-items:center;justify-content:center;background:var(--green-light);border-radius:12px}
+.dish-info{flex:1;min-width:0}
+.dish-name{font-size:15px;font-weight:500;margin-bottom:2px}
+.dish-desc{font-size:12px;color:var(--muted);line-height:1.4;margin-bottom:5px}
+.dish-price{font-size:13px;color:var(--green);font-weight:500}
+.qty-wrap{display:flex;align-items:center;gap:10px;flex-shrink:0}
+.qty-btn{width:30px;height:30px;border-radius:50%;border:1.5px solid var(--border);background:var(--bg);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text);line-height:1;transition:background .1s,border-color .1s;-webkit-tap-highlight-color:transparent}
+.qty-btn:active{border-color:var(--green);background:var(--green-light)}
+.qty-num{font-size:15px;font-weight:500;min-width:18px;text-align:center}
+
+.cart-bar{position:sticky;bottom:0;background:var(--card);border-top:1px solid var(--border);padding:12px 1.25rem;display:flex;align-items:center;justify-content:space-between;gap:12px;z-index:50}
+.cart-info .cart-count{font-size:15px;font-weight:500}
+.cart-info .cart-total{font-size:13px;color:var(--muted);margin-top:1px}
+.order-btn{background:var(--green);color:#fff;border:none;border-radius:var(--radius-sm);padding:12px 24px;font-size:14px;font-weight:500;cursor:pointer;font-family:'Noto Sans SC',sans-serif;transition:background .15s;white-space:nowrap;-webkit-tap-highlight-color:transparent}
+.order-btn:disabled{background:#ccc;cursor:not-allowed}
+.order-btn:not(:disabled):active{background:var(--green-mid)}
+
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:100;align-items:flex-end;justify-content:center}
+.modal-bg.open{display:flex}
+.modal{background:var(--card);border-radius:24px 24px 0 0;width:100%;max-width:480px;max-height:90vh;overflow-y:auto;animation:slideUp .25s ease}
+@keyframes slideUp{from{transform:translateY(60px);opacity:0}to{transform:translateY(0);opacity:1}}
+
+.modal-handle{width:36px;height:4px;background:var(--border);border-radius:2px;margin:12px auto 0}
+.modal-header{padding:1.25rem 1.25rem 0}
+.modal-header h2{font-family:'Noto Serif SC',serif;font-size:20px;font-weight:600;margin-bottom:3px}
+.modal-header p{font-size:13px;color:var(--muted)}
+
+.order-summary{margin:1rem 1.25rem 0;background:var(--green-light);border-radius:var(--radius-sm);padding:12px 14px}
+.order-row{display:flex;justify-content:space-between;align-items:center;font-size:13px;padding:4px 0}
+.order-row .item-price{color:var(--muted)}
+.order-divider{border:none;border-top:1px dashed #c8e6da;margin:8px 0}
+.order-total-row{display:flex;justify-content:space-between;font-size:15px;font-weight:500;padding:4px 0;color:var(--green)}
+
+.modal-form{padding:1rem 1.25rem 1.5rem}
+.field{margin-bottom:14px}
+.field-label{font-size:12px;color:var(--muted);margin-bottom:5px;display:block;font-weight:500;letter-spacing:0.03em}
+.field input,.field textarea{width:100%;border:1px solid var(--border);border-radius:var(--radius-sm);padding:11px 14px;font-size:14px;font-family:'Noto Sans SC',sans-serif;color:var(--text);background:var(--bg);outline:none;transition:border-color .15s}
+.field input:focus,.field textarea:focus{border-color:var(--green)}
+.field textarea{height:70px;resize:none}
+.status-msg{font-size:13px;color:#c0392b;min-height:18px;margin-bottom:10px;text-align:center}
+.modal-actions{display:flex;gap:10px}
+.cancel-btn{flex:1;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:13px;font-size:14px;cursor:pointer;color:var(--muted);font-family:'Noto Sans SC',sans-serif}
+.submit-btn{flex:2;background:var(--green);border:none;border-radius:var(--radius-sm);padding:13px;font-size:14px;font-weight:500;color:#fff;cursor:pointer;font-family:'Noto Sans SC',sans-serif;transition:background .15s}
+.submit-btn:not(:disabled):active{background:var(--green-mid)}
+.submit-btn:disabled{background:#ccc;cursor:not-allowed}
+
+.toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:var(--green);color:#fff;padding:12px 24px;border-radius:var(--radius-sm);font-size:14px;display:none;z-index:200;white-space:nowrap;box-shadow:0 4px 20px rgba(26,122,85,0.35)}
+.toast.show{display:block}
+.spacer{height:80px}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <span class="hero-icon">🍽️</span>
+  <h1>今日菜单</h1>
+  <p>选好菜品，填写姓名<br>订单直接送达厨房</p>
+</div>
+
+<div class="section-label">主食</div>
+<div class="menu-list" id="riceList"></div>
+
+<div class="section-label">荤菜</div>
+<div class="menu-list" id="meatList"></div>
+
+<div class="section-label">素菜 &amp; 小食</div>
+<div class="menu-list" id="vegList"></div>
+
+<div class="section-label">特饮</div>
+<div class="menu-list" id="drinkList"></div>
+
+<div class="spacer"></div>
+
+<div class="cart-bar">
+  <div class="cart-info">
+    <div class="cart-count" id="cartCount">0 件菜品</div>
+    <div class="cart-total" id="cartTotal">尚未选择</div>
+  </div>
+  <button class="order-btn" id="checkoutBtn" disabled onclick="openModal()">去结单 →</button>
+</div>
+
+<div class="modal-bg" id="modalBg">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <h2>确认订单</h2>
+      <p>请核对菜品并填写你的信息</p>
+    </div>
+    <div class="order-summary" id="orderSummary"></div>
+    <div class="modal-form">
+      <div class="field">
+        <label class="field-label">你的名字</label>
+        <input type="text" id="nameInput" placeholder="例如：小明" />
+      </div>
+      <div class="field">
+        <label class="field-label">备注（可选）</label>
+        <textarea id="noteInput" placeholder="少辣、不加葱…"></textarea>
+      </div>
+      <div class="status-msg" id="statusMsg"></div>
+      <div class="modal-actions">
+        <button class="cancel-btn" onclick="closeModal()">返回</button>
+        <button class="submit-btn" id="submitBtn" onclick="submitOrder()">确认下单</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast">✓ 订单已发送！厨师正在备餐</div>
+
+<script>
+const dishes = [
+  // 主食
+  { id:1,  name:"牛腩饭",       emoji:"🍛", desc:"软烂牛腩配白米饭",       price:28, cat:"rice" },
+  { id:2,  name:"卤肉饭",       emoji:"🍚", desc:"台式卤肉，香润下饭",     price:22, cat:"rice" },
+  // 荤菜
+  { id:3,  name:"虫草花蒸鸡翅", emoji:"🍗", desc:"虫草花提鲜，蒸制嫩滑",   price:38, cat:"meat" },
+  { id:4,  name:"百香果酸辣柠檬虾", emoji:"🦐", desc:"酸辣清爽，开胃解馋",  price:48, cat:"meat" },
+  { id:5,  name:"清炖牛肋条",   emoji:"🍲", desc:"慢炖三小时，汤清味醇",   price:58, cat:"meat" },
+  { id:6,  name:"话梅排骨",     emoji:"🍖", desc:"话梅入味，微酸鲜香",     price:38, cat:"meat" },
+  { id:7,  name:"红烧肉",       emoji:"🥩", desc:"肥而不腻，入口即化",     price:42, cat:"meat" },
+  { id:8,  name:"糖醋排骨",     emoji:"🍖", desc:"酸甜酥嫩，下饭神器",     price:38, cat:"meat" },
+  { id:9,  name:"蒜蓉虾滑粉丝煲", emoji:"🥘", desc:"虾滑鲜弹，粉丝吸汁",   price:45, cat:"meat" },
+  { id:10, name:"鸡翅鸡爪煲",   emoji:"🍗", desc:"香卤入味，啃起来过瘾",   price:42, cat:"meat" },
+  { id:11, name:"捞汁小海鲜",   emoji:"🦑", desc:"冰镇捞汁，鲜甜爽口",     price:48, cat:"meat" },
+  { id:12, name:"西红柿炒鸡蛋", emoji:"🍅", desc:"经典家常，酸甜爽口",     price:22, cat:"meat" },
+  { id:13, name:"青椒肉丝",     emoji:"🌶️", desc:"清脆青椒配嫩肉丝",       price:25, cat:"meat" },
+  // 素菜 & 小食
+  { id:14, name:"干锅花菜",     emoji:"🥦", desc:"香辣爽脆，素食首选",     price:22, cat:"veg" },
+  { id:15, name:"炝拌土豆丝",   emoji:"🥔", desc:"酸辣爽口，开胃小菜",     price:16, cat:"veg" },
+  { id:16, name:"蒸蛋羹",       emoji:"🥚", desc:"嫩滑如豆腐，鲜香清淡",   price:12, cat:"veg" },
+  { id:17, name:"老醋花生",     emoji:"🥜", desc:"酥脆花生，酸香下酒",     price:14, cat:"veg" },
+  // 特饮
+  { id:18, name:"菠萝冰",       emoji:"🧊", desc:"清凉解暑，台式特调",     price:18, cat:"drink" },
+];
+
+const cart = {};
+
+function cardHTML(d) {
+  const qty = cart[d.id] || 0;
+  return `<div class="dish-card${qty>0?' selected':''}" id="card-${d.id}">
+    <div class="dish-emoji">${d.emoji}</div>
+    <div class="dish-info">
+      <div class="dish-name">${d.name}</div>
+      <div class="dish-desc">${d.desc}</div>
+      <div class="dish-price">¥${d.price}</div>
+    </div>
+    <div class="qty-wrap">
+      <button class="qty-btn" onclick="changeQty(${d.id},-1)" aria-label="减少">−</button>
+      <span class="qty-num">${qty}</span>
+      <button class="qty-btn" onclick="changeQty(${d.id},1)" aria-label="增加">+</button>
+    </div>
+  </div>`;
+}
+
+function renderMenu() {
+  document.getElementById("riceList").innerHTML  = dishes.filter(d=>d.cat==="rice").map(cardHTML).join("");
+  document.getElementById("meatList").innerHTML  = dishes.filter(d=>d.cat==="meat").map(cardHTML).join("");
+  document.getElementById("vegList").innerHTML   = dishes.filter(d=>d.cat==="veg").map(cardHTML).join("");
+  document.getElementById("drinkList").innerHTML = dishes.filter(d=>d.cat==="drink").map(cardHTML).join("");
+}
+
+function changeQty(id, delta) {
+  cart[id] = Math.max(0, (cart[id]||0) + delta);
+  if (cart[id] === 0) delete cart[id];
+  const el = document.getElementById("card-"+id);
+  if (el) {
+    el.className = "dish-card" + (cart[id]>0?" selected":"");
+    el.querySelector(".qty-num").textContent = cart[id]||0;
+  }
+  updateCartBar();
+}
+
+function updateCartBar() {
+  const ids = Object.keys(cart);
+  const total = ids.reduce((s,id)=>s+cart[id]*dishes.find(d=>d.id==id).price, 0);
+  const count = ids.reduce((s,id)=>s+cart[id], 0);
+  document.getElementById("cartCount").textContent = count>0 ? count+" 件菜品" : "0 件菜品";
+  document.getElementById("cartTotal").textContent = count>0 ? "合计 ¥"+total : "尚未选择";
+  document.getElementById("checkoutBtn").disabled = count===0;
+}
+
+function openModal() {
+  const ids = Object.keys(cart);
+  let html = "";
+  ids.forEach(id => {
+    const d = dishes.find(x=>x.id==id);
+    html += `<div class="order-row"><span class="item-name">${d.emoji} ${d.name} × ${cart[id]}</span><span class="item-price">¥${d.price*cart[id]}</span></div>`;
+  });
+  const total = ids.reduce((s,id)=>s+cart[id]*dishes.find(d=>d.id==id).price, 0);
+  html += `<hr class="order-divider"><div class="order-total-row"><span>合计</span><span>¥${total}</span></div>`;
+  document.getElementById("orderSummary").innerHTML = html;
+  document.getElementById("statusMsg").textContent = "";
+  document.getElementById("modalBg").classList.add("open");
+}
+
+function closeModal() { document.getElementById("modalBg").classList.remove("open"); }
+
+async function submitOrder() {
+  const name = document.getElementById("nameInput").value.trim();
+  const note = document.getElementById("noteInput").value.trim();
+  const statusEl = document.getElementById("statusMsg");
+  const btn = document.getElementById("submitBtn");
+  if (!name) { statusEl.textContent = "请填写你的名字"; return; }
+  const ids = Object.keys(cart);
+  const items = ids.map(id => { const d=dishes.find(x=>x.id==id); return`${d.name} × ${cart[id]}（¥${d.price*cart[id]}）`; }).join("\n");
+  const total = ids.reduce((s,id)=>s+cart[id]*dishes.find(d=>d.id==id).price, 0);
+  btn.disabled = true; statusEl.textContent = "正在发送…";
+  try {
+    const res = await fetch("https://api.emailjs.com/api/v1.0/email/send", {
+      method:"POST", headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({
+        service_id: "service_rek",
+        template_id: "template_regadbo",
+        user_id: "8_MeFi0MbbPv_M92_",
+        template_params: {
+          to_email: "bcw2479745065@gmail.com",
+          customer_name: name,
+          customer_email: name,
+          order_items: items,
+          order_total: "¥"+total,
+          note: note||"无",
+          order_time: new Date().toLocaleString("zh-CN")
+        }
+      })
+    });
+    if (res.ok || res.status===200) {
+      closeModal();
+      const toast = document.getElementById("toast");
+      toast.classList.add("show");
+      setTimeout(()=>toast.classList.remove("show"), 3500);
+      Object.keys(cart).forEach(id=>{ delete cart[id]; });
+      renderMenu(); updateCartBar();
+      document.getElementById("nameInput").value = "";
+      document.getElementById("noteInput").value = "";
+    } else { statusEl.textContent = "发送失败，请重试"; }
+  } catch(e) { statusEl.textContent = "网络错误，请检查配置"; }
+  btn.disabled = false;
+}
+
+renderMenu(); updateCartBar();
+document.getElementById("modalBg").addEventListener("click", function(e){ if(e.target===this) closeModal(); });
+</script>
+</body>
+</html>
